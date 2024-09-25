@@ -13,7 +13,7 @@
     kubernetes_yum_base_url: "https://pkgs.k8s.io/core:/stable:/v{{ kubernetes_version_rhel_package.split('.')[:2]  | join('.') }}/rpm/"
     kubernetes_yum_gpg_key: "https://pkgs.k8s.io/core:/stable:/v{{ kubernetes_version_rhel_package.split('.')[:2]  | join('.') }}/rpm/repodata/repomd.xml.key"
     kubernetes_version: "{{ kubernetes_version_rhel_package.split('.')[:2]  | join('.') }}"
-    kubernetes_kubelet_extra_args: "--node-ip={{ ansible_enp0s8.ipv4.address }}"
+    kubernetes_kubelet_extra_args: "--node-ip={{ ansible_eth1.ipv4.address }}"
     crictl_version: "v1.30.0"
     kubernetes_config_kubelet_configuration:
       cgroupDriver: "systemd"
@@ -85,8 +85,8 @@
         - name: kubernetes-cni
           state: present
   post_tasks:
-  - name: Configure Flannel networking for enp0s8
-    shell: "curl {{ kubernetes_flannel_manifest_file }} | sed '/kube-subnet-mgr.*/a\\        - --iface=enp0s8' | kubectl apply -f -"
+  - name: Configure Flannel networking for eth1
+    shell: "curl {{ kubernetes_flannel_manifest_file }} | sed '/kube-subnet-mgr.*/a\\        - --iface=eth1' | kubectl apply -f -"
     register: flannel_result
     changed_when: "'created' in flannel_result.stdout"
     when: kubernetes_pod_network.cni == 'flannel' and kubernetes_role == 'control_plane' and installation_method == 'vagrant'
